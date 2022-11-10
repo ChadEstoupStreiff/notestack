@@ -1,5 +1,3 @@
-
-
 pub mod notes {
     use mysql::*;
     use mysql::prelude::*;

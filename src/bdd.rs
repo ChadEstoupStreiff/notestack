@@ -74,11 +74,6 @@ pub mod notes {
             },
             Err(e) => Err(e)
         }
-
-        // let note: std::option::Option<String> = conn.exec_first(&stmt, params! {
-        //     "note_id" => id
-        // }).unwrap();
-        // format!("{:?}", note)
     }
 
     pub fn get_free_id(conn: &mut PooledConn) -> String {

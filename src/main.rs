@@ -2,6 +2,7 @@ use actix_web::{get, post, web, App, HttpServer, Responder, Result};
 use actix_files::NamedFile;
 use serde::Deserialize;
 use std::sync::Mutex;
+use std::io::Error;
 
 mod bdd;
 pub use crate::bdd::notes;
@@ -16,41 +17,58 @@ struct NoteFormData {
 
 
 #[get("/")]
-async fn hello() -> Result<NamedFile> {
-    Ok(NamedFile::open("./web/index.html")?)
+async fn hello() -> Result<NamedFile, Error> {
+    match NamedFile::open("./web/index.html") {
+        Ok(file) => Ok(file),
+        Err(e) => Err(e)
+    }
 }
 
 #[get("/create")]
-async fn create_note_form() -> Result<NamedFile> {
-    Ok(NamedFile::open("./web/form.html")?)
+async fn create_note_form() -> Result<NamedFile, Error> {
+    match NamedFile::open("./web/form.html") {
+        Ok(file) => Ok(file),
+        Err(e) => Err(e)
+    }
 }
 
 
 #[get("/note/{note_id}")]
-async fn see_note() -> Result<NamedFile> {
-    Ok(NamedFile::open("./web/note.html")?)
+async fn see_note() -> Result<NamedFile, Error> {
+    match NamedFile::open("./web/note.html") {
+        Ok(file) => Ok(file),
+        Err(e) => Err(e)
+    }
 }
 
 
 #[post("/api/create")]
 async fn create_note(info: web::Form<NoteFormData>, data: web::Data<AppData>) -> impl Responder {
-    let mut conn = data.conn.lock().unwrap();
-    let mut info_id: String = info.id.clone();
-    if info_id.len() == 0 {
-        info_id = bdd::notes::get_free_id(&mut conn);
-    }
-    match notes::insert_note(&mut conn, &info_id, info.note.clone()) {
-        Ok(_) => format!("Success:{}", info_id),
-        Err(e) => format!("Error: {}", e)
+    match data.conn.lock() {
+        Ok(mut conn) => {
+            let mut info_id: String = info.id.clone();
+            if info_id.len() == 0 {
+                info_id = bdd::notes::get_free_id(&mut conn);
+            }
+            match notes::insert_note(&mut conn, &info_id, info.note.clone()) {
+                Ok(_) => format!("Success:{}", info_id),
+                Err(e) => format!("Error: {}", e)
+            }
+        },
+        Err(_) => format!("Error: cannot connect to database")
     }
 }
 
 #[get("/api/note/{note_id}")]
 async fn get_note(note_id: web::Path<String>, data: web::Data<AppData>) -> impl Responder {
-    let mut conn = data.conn.lock().unwrap();
-    match notes::get_note(&mut conn, note_id.to_string()) {
-        Ok(note) => format!("{}", note.note),
-        Err(_) => format!("")
+    match data.conn.lock() {
+        Ok(mut conn) => {
+            match notes::get_note(&mut conn, note_id.to_string()) {
+                Ok(note) => format!("{}", note.note),
+                Err(_) => format!("")
+            }
+        },
+        Err(_) => format!("Error: cannot connect to database")
     }
 }
 

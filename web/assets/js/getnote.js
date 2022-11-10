@@ -11,7 +11,11 @@ function load_note() {
     xmlHttp.send(null);
     result = xmlHttp.responseText;
 
-    document.getElementById("note").innerHTML = result;
+    if (result.length > 0) {
+        document.getElementById("note").innerHTML = result;
+    } else {
+        document.getElementById("note").innerHTML = "No note available at this ID";
+    }
 }
 
 document.addEventListener('DOMContentLoaded', function() {

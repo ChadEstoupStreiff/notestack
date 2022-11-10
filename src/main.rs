@@ -27,12 +27,8 @@ async fn create_note_form() -> Result<NamedFile> {
 
 
 #[get("/note/{note_id}")]
-async fn see_note(note_id: web::Path<String>, data: web::Data<AppData>) -> Result<NamedFile> {
-    let mut conn = data.conn.lock().unwrap();
-    match notes::get_note(&mut conn, note_id.to_string()) {
-        Ok(_) => Ok(NamedFile::open("./web/note.html")?),
-        Err(_) => Ok(NamedFile::open("./web/nonote.html")?)
-    }
+async fn see_note() -> Result<NamedFile> {
+    Ok(NamedFile::open("./web/note.html")?)
 }
 
 

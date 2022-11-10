@@ -1,0 +1,6 @@
+CREATE TABLE IF NOT EXISTS Notes (
+    id VARCHAR(30),
+    note VARCHAR(65000),
+    date VARCHAR(19),
+    CONSTRAINT pk_id PRIMARY KEY (id)
+);
